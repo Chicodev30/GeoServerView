@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.ol-scale-line {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  padding: 2px 4px !important;
+  border-radius: 4px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.ol-scale-line-inner {
+  border: 1px solid #666 !important;
+  border-top: none !important;
+  color: #666 !important;
+  font-size: 10px !important;
+  text-align: center !important;
+  margin: 1px !important;
+  font-family: system-ui, -apple-system, sans-serif !important;
+}
+
+#root {
+  height: 100vh;
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
