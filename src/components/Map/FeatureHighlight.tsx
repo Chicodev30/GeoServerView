@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 import { Map } from 'ol';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
@@ -6,43 +7,48 @@ import { GeoJSON } from 'ol/format';
 import { Style, Fill, Stroke } from 'ol/style';
 import { WMSLayer } from '../../types/map';
 import { buffer } from 'ol/extent';
+import { Feature } from 'ol';
+import { Geometry } from 'ol/geom';
 
 interface FeatureHighlightProps {
   map: Map;
   visibleLayers: WMSLayer[];
+  isPopup?: boolean;
 }
 
-export const FeatureHighlight = ({ map, visibleLayers }: FeatureHighlightProps) => {
-  const highlightLayerRef = useRef<VectorLayer<VectorSource>>();
-
-  useEffect(() => {
-    const highlightSource = new VectorSource();
-    const highlightLayer = new VectorLayer({
-      source: highlightSource,
+export const FeatureHighlight = ({ map, visibleLayers, isPopup = false }: FeatureHighlightProps) => {
+  const highlightSourceRef = useRef<VectorSource>(new VectorSource());
+  const highlightLayerRef = useRef<VectorLayer<VectorSource>>(
+    new VectorLayer({
+      source: highlightSourceRef.current,
       style: new Style({
         fill: new Fill({
-          color: 'rgba(255, 255, 0, 0.2)',
+          color: isPopup ? 'rgba(0, 120, 255, 0.2)' : 'rgba(255, 255, 0, 0.2)'
         }),
         stroke: new Stroke({
-          color: '#FF4444',
-          width: 3,
-          lineDash: [10, 10],
-        }),
+          color: isPopup ? '#0078FF' : '#FFD700',
+          width: 2
+        })
       }),
-      zIndex: 999,
-    });
-    
+      zIndex: 1000
+    })
+  );
+  const { serverUrl, getAuthHeader } = useAuth();
+
+  useEffect(() => {
+    const highlightSource = highlightSourceRef.current;
+    const highlightLayer = highlightLayerRef.current;
+
     map.addLayer(highlightLayer);
-    highlightLayerRef.current = highlightLayer;
 
     const handleMapClick = async (evt: any) => {
+      highlightSource.clear();
+
       const coordinate = evt.coordinate;
       const viewResolution = map.getView().getResolution();
       const projection = map.getView().getProjection();
 
-      if (!viewResolution || visibleLayers.length === 0) return;
-
-      highlightSource.clear();
+      if (!viewResolution) return;
 
       for (const layer of visibleLayers) {
         const url = layer.source.getFeatureInfoUrl(
@@ -60,7 +66,7 @@ export const FeatureHighlight = ({ map, visibleLayers }: FeatureHighlightProps) 
           try {
             const response = await fetch(url, {
               headers: {
-                'Authorization': 'Basic ' + btoa('admin:geoserver')
+                'Authorization': getAuthHeader()
               }
             });
             
@@ -77,7 +83,7 @@ export const FeatureHighlight = ({ map, visibleLayers }: FeatureHighlightProps) 
                 const geojsonFeature = new GeoJSON().readFeature(feature, {
                   dataProjection: 'EPSG:3857',
                   featureProjection: projection.getCode()
-                });
+                }) as Feature<Geometry>;
 
                 const geom = geojsonFeature.getGeometry();
                 if (geom) {
@@ -110,7 +116,7 @@ export const FeatureHighlight = ({ map, visibleLayers }: FeatureHighlightProps) 
       map.removeLayer(highlightLayer);
       map.un('singleclick', handleMapClick);
     };
-  }, [map, visibleLayers]);
+  }, [map, visibleLayers, serverUrl, getAuthHeader]);
 
   return null;
 };

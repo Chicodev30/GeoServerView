@@ -1,8 +1,10 @@
 import { useEffect, useRef } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 import { Map } from 'ol';
 import Overlay from 'ol/Overlay';
 import { WMSLayer } from '../../types/map';
 import { GeoJSON } from 'ol/format';
+import { FeatureHighlight } from './FeatureHighlight';
 
 interface PopupProps {
   map: Map;
@@ -12,8 +14,9 @@ interface PopupProps {
 export const Popup = ({ map, visibleLayers }: PopupProps) => {
   const popupRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const closerRef = useRef<HTMLAnchorElement>(null);
+  const closerRef = useRef<HTMLButtonElement>(null);
   const currentFeatureRef = useRef<any>(null);
+  const { serverUrl, getAuthHeader } = useAuth();
 
   useEffect(() => {
     if (!popupRef.current) return;
@@ -42,7 +45,7 @@ export const Popup = ({ map, visibleLayers }: PopupProps) => {
         const url = layer.source.getFeatureInfoUrl(
           coordinate,
           viewResolution,
-          'EPSG:3857',
+          projection.getCode(),
           {
             'INFO_FORMAT': 'application/json',
             'FEATURE_COUNT': 1,
@@ -54,7 +57,7 @@ export const Popup = ({ map, visibleLayers }: PopupProps) => {
           try {
             const response = await fetch(url, {
               headers: {
-                'Authorization': 'Basic ' + btoa('admin:geoserver')
+                'Authorization': getAuthHeader()
               }
             });
             const data = await response.json();
@@ -63,21 +66,27 @@ export const Popup = ({ map, visibleLayers }: PopupProps) => {
               currentFeatureRef.current = data.features[0];
               const properties = data.features[0].properties;
               content += `
-                <div class="mb-2">
-                  <div class="bg-blue-50 px-2 py-1 mb-1 text-xs font-medium text-blue-900 break-words border-b border-blue-100">
-                    ${layer.title || layer.name}
+                <div class="bg-white rounded-lg shadow-lg border border-gray-200">
+                  <div class="px-3 py-2 border-b border-gray-200">
+                    <h3 class="text-sm font-medium text-gray-900">${layer.title || layer.name}</h3>
                   </div>
-                  <div class="space-y-1 px-2">
-                    ${Object.entries(properties)
-                      .map(([key, value]) => `
-                        <div class="text-xs border-b border-gray-50">
-                          <span class="font-medium text-gray-600">${key}:</span>
-                          <span class="text-gray-900 ml-1 break-all">${value}</span>
-                        </div>
-                      `).join('')}
+                  <div class="px-3 py-2">
+                    <table class="min-w-full divide-y divide-gray-200">
+                      <tbody class="divide-y divide-gray-200">
+                        ${Object.entries(properties)
+                          .filter(([key]) => key !== 'geometry' && key !== 'geom')
+                          .map(([key, value]) => `
+                            <tr>
+                              <td class="py-1 pr-4 text-sm font-medium text-gray-500">${key}</td>
+                              <td class="py-1 text-sm text-gray-900">${value}</td>
+                            </tr>
+                          `).join('')}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               `;
+              break;
             }
           } catch (error) {
             console.error('Error fetching feature info:', error);
@@ -136,32 +145,34 @@ export const Popup = ({ map, visibleLayers }: PopupProps) => {
       map.un('singleclick', handleMapClick);
       delete (window as any).zoomToFeature;
     };
-  }, [map, visibleLayers]);
+  }, [map, visibleLayers, serverUrl, getAuthHeader]);
 
   return (
-    <div 
-      ref={popupRef} 
-      className="absolute bg-white shadow-lg rounded border border-gray-200"
-      style={{
-        width: '240px',
-        maxWidth: '240px',
-        maxHeight: '200px'
-      }}
-    >
-      <div className="flex items-center justify-between bg-gray-50 px-2 py-1 rounded-t border-b border-gray-100">
-        <div className="flex-1" />
-        <a 
-          href="#" 
-          ref={closerRef} 
-          className="text-gray-400 hover:text-gray-600 z-10 w-4 h-4 flex items-center justify-center rounded-full hover:bg-gray-100 text-xs"
-        >
-          ✖
-        </a>
-      </div>
+    <>
+      <FeatureHighlight map={map} visibleLayers={visibleLayers} isPopup={true} />
       <div 
-        ref={contentRef} 
-        className="max-h-[172px] overflow-y-auto overflow-x-hidden"
-      />
-    </div>
+        ref={popupRef} 
+        className="absolute bg-white shadow-lg rounded border border-gray-200"
+        style={{
+          width: '240px',
+          maxWidth: '240px',
+          maxHeight: '200px'
+        }}
+      >
+        <div className="flex items-center justify-between bg-gray-50 px-2 py-1 rounded-t border-b border-gray-100">
+          <div className="flex-1" />
+          <button 
+            ref={closerRef} 
+            className="text-gray-400 hover:text-gray-600 z-10 w-4 h-4 flex items-center justify-center rounded-full hover:bg-gray-100 text-xs"
+          >
+            ✖
+          </button>
+        </div>
+        <div 
+          ref={contentRef} 
+          className="max-h-[172px] overflow-y-auto overflow-x-hidden"
+        />
+      </div>
+    </>
   );
 };

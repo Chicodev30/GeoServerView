@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { X } from 'lucide-react';
 
 interface MessageDialogProps {
   message: string;
@@ -6,42 +6,23 @@ interface MessageDialogProps {
 }
 
 export const MessageDialog = ({ message, onClose }: MessageDialogProps) => {
-  const dialogRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
-  }, [onClose]);
-
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
   return (
-    <div 
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 pointer-events-auto"
-      onClick={handleBackdropClick}
-    >
-      <div
-        ref={dialogRef}
-        className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6"
-        role="dialog"
-        aria-modal="true"
-        onClick={e => e.stopPropagation()}
-      >
-        <div className="text-center">
-          <p className="text-gray-700 mb-6">{message}</p>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
+        <div className="flex justify-between items-start mb-4">
+          <h3 className="text-lg font-medium text-gray-900">Aviso</h3>
           <button
             onClick={onClose}
-            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
+            className="text-gray-400 hover:text-gray-500"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <p className="text-gray-600">{message}</p>
+        <div className="mt-6 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
           >
             OK
           </button>

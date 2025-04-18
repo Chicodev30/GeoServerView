@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Layers, Folder, Search, FileText, MapPinned, Menu, LogOut } from 'lucide-react';
+import { Layers, Folder, Search, MapPinned, Menu, LogOut } from 'lucide-react';
 import { LayerControl } from './LayerControl';
 import { WorkspaceControl } from './WorkspaceControl';
 import { SearchControl } from './SearchControl';
@@ -76,16 +76,6 @@ export const SideMenu = ({
       setTimeout(() => setActiveSection(null), 300);
     } else {
       setActiveSection('workspace');
-      setIsPanelVisible(true);
-    }
-  };
-
-  const handleLogsClick = () => {
-    if (activeSection === 'logs') {
-      setIsPanelVisible(false);
-      setTimeout(() => setActiveSection(null), 300);
-    } else {
-      setActiveSection('logs');
       setIsPanelVisible(true);
     }
   };
@@ -178,16 +168,6 @@ export const SideMenu = ({
               <Search className="w-4 h-4" />
               <span className="ml-2 text-xs font-medium">Procurar</span>
             </button>
-            
-            <button 
-              className={`flex items-center h-10 px-2 mt-1 rounded hover:bg-gray-300 ${
-                activeSection === 'logs' ? 'bg-gray-300' : ''
-              }`}
-              onClick={handleLogsClick}
-            >
-              <FileText className="w-4 h-4" />
-              <span className="ml-2 text-xs font-medium">Logs</span>
-            </button>
           </div>
         </div>
       </div>
@@ -225,15 +205,6 @@ export const SideMenu = ({
                 onFeaturesSelected={onFeaturesSelected}
                 onSearchComplete={handleSearchComplete}
               />
-            </div>
-          )}
-
-          {activeSection === 'logs' && (
-            <div className="h-full overflow-auto">
-              <h2 className="text-base font-semibold mb-2">Logs</h2>
-              <div className="prose prose-sm">
-                <p>Em desenvolvimento...</p>
-              </div>
             </div>
           )}
         </div>

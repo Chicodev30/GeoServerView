@@ -6,7 +6,7 @@ export const LoginForm = () => {
   const { login, isLoading } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [serverUrl, setServerUrl] = useState('https://imde.portoalegre.rs.gov.br/geoserver');
+  const [serverUrl, setServerUrl] = useState('');
   const [error, setError] = useState('');
 
   const validateUrl = (url: string) => {

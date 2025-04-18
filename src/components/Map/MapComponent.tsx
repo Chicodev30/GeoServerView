@@ -62,10 +62,10 @@ export const MapComponent = () => {
       source: vectorSourceRef.current,
       style: new Style({
         fill: new Fill({
-          color: 'rgba(255, 255, 255, 0.4)'
+          color: 'rgba(255, 255, 0, 0.2)'
         }),
         stroke: new Stroke({
-          color: '#3b82f6',
+          color: '#FFD700',
           width: 2
         })
       }),
@@ -324,7 +324,7 @@ export const MapComponent = () => {
             onToggleWorkspace={toggleWorkspace}
             onFeaturesSelected={handleFeaturesSelected}
           />
-          <FeatureHighlight map={map} visibleLayers={visibleLayers} />
+          <FeatureHighlight map={map} visibleLayers={visibleLayers} isPopup={false} />
           <Popup map={map} visibleLayers={visibleLayers} />
           <BottomSheet 
             features={selectedFeatures}

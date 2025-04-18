@@ -31,7 +31,7 @@ export const LayerControl = ({ map, layers }: LayerControlProps) => {
         {layers.map((layer, index) => (
           <div key={`${layer.name}-${index}`} className="flex items-start gap-2 p-2 border border-gray-200 rounded-md mb-2">
             <div className="flex-shrink-0">
-              <LayerPreview layerName={layer.name} workspace={layer.workspace} />
+              <LayerPreview layerName={layer.name} workspace={layer.workspace} map={map} />
             </div>
             <div className="flex-1 min-w-0 overflow-hidden">
               <label className="flex items-start gap-1.5 cursor-pointer">
