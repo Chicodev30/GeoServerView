@@ -3,9 +3,11 @@ import { X } from 'lucide-react';
 interface MessageDialogProps {
   message: string;
   onClose: () => void;
+  onConfirm?: () => void;
+  showConfirm?: boolean;
 }
 
-export const MessageDialog = ({ message, onClose }: MessageDialogProps) => {
+export const MessageDialog = ({ message, onClose, onConfirm, showConfirm }: MessageDialogProps) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
@@ -19,13 +21,30 @@ export const MessageDialog = ({ message, onClose }: MessageDialogProps) => {
           </button>
         </div>
         <p className="text-gray-600">{message}</p>
-        <div className="mt-6 flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-          >
-            OK
-          </button>
+        <div className="mt-6 flex justify-end gap-2">
+          {showConfirm ? (
+            <>
+              <button
+                onClick={onClose}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={onConfirm}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+              >
+                Confirmar
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={onClose}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            >
+              OK
+            </button>
+          )}
         </div>
       </div>
     </div>
